@@ -3,6 +3,7 @@ import { Text, TextInput, View } from "../general/Themed";
 import { ExerciseSet } from "@/types/models";
 import Swipeable from "react-native-gesture-handler/Swipeable";
 import CustomButton from "../general/CustomButton";
+import { useWorkouts } from "@/app/store";
 
 type SetItem = {
   index: number;
@@ -12,18 +13,20 @@ type SetItem = {
 const SetItem = ({ index, set }: SetItem) => {
   const [weight, setweight] = useState(set.weight?.toString() || "");
   const [reps, setreps] = useState(set.reps?.toString() || "");
+  const updateSet = useWorkouts((state) => state.updateSet);
+  const deleteSet = useWorkouts((state) => state.deleteSet);
 
   const handleWeightChange = () => {
-    console.warn("Weight changed to: ", weight);
+    updateSet(set.id, { weight: parseFloat(weight) });
   };
 
   const handleRepsChange = () => {
-    console.warn("Weight changed to: ", reps);
+    updateSet(set.id, { reps: parseInt(reps) });
   };
 
   const renderRightActions = () => (
     <CustomButton
-      onPress={() => console.warn("Deleting set: ", set.id)}
+      onPress={() => deleteSet(set.id)}
       title="Delete"
       type="link"
       style={{ width: "auto", padding: 5 }}

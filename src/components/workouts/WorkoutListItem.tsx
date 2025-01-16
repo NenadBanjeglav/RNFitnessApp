@@ -15,7 +15,7 @@ type WorkoutListItem = {
 };
 
 const WorkoutListItem = ({ workout }: WorkoutListItem) => {
-  const { createdAt, exercises, finishedAt, id } = workout;
+  const { createdAt, exercises, finishedAt } = workout;
 
   return (
     <Card
@@ -37,16 +37,21 @@ const WorkoutListItem = ({ workout }: WorkoutListItem) => {
             key={id}
             style={{ flexDirection: "row", justifyContent: "space-between" }}
           >
-            <Text style={{ color: "gray" }}>
-              {sets.length} x {name}
-            </Text>
-            <Text style={{ color: "gray" }}>
-              {bestSet
-                ? `${bestSet.reps} ${
-                    bestSet.weight ? `x ${bestSet.weight} kg` : "reps"
-                  }`
-                : `null`}
-            </Text>
+            {sets.length && (
+              <>
+                <Text style={{ color: "gray" }}>
+                  {sets.length} x {name}
+                </Text>
+
+                <Text style={{ color: "gray" }}>
+                  {bestSet
+                    ? `${bestSet.reps} ${
+                        bestSet.weight ? `x ${bestSet.weight} kg` : "reps"
+                      }`
+                    : `null`}
+                </Text>
+              </>
+            )}
           </View>
         );
       })}

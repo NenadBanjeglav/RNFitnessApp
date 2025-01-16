@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Text, View } from "../general/Themed";
-import dummyWorkouts from "@/data/dummyWorkouts";
 import { calculateDuration } from "@/utils/time";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { useWorkouts } from "@/app/store";
 
 const WorkoutHeader = () => {
   const [timer, settimer] = useState("00:00:00");
 
-  const workout = dummyWorkouts[0];
+  const workout = useWorkouts((state) => state.currentWorkout);
 
   useEffect(() => {
+    if (!workout || !workout.createdAt) return;
     const interval = setInterval(() => {
       const duration = calculateDuration(
         new Date(workout.createdAt),
