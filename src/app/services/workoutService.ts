@@ -1,6 +1,17 @@
-import { Workout, WorkoutWithExercises } from "@/types/models";
-import { getExerciseTotalWeight } from "./exerciseService";
+import {
+  ExerciseWithSets,
+  Workout,
+  WorkoutWithExercises,
+} from "@/types/models";
+import {
+  addSetsToExercise,
+  cleanExercise,
+  getExerciseTotalWeight,
+} from "./exerciseService";
 import * as Crypto from "expo-crypto";
+
+import { getCurrentWorkout, getWorkouts, saveWorkout } from "@/db/workout";
+import { getExercises } from "@/db/exercises";
 
 export const getWorkoutTotalWeight = (workout: WorkoutWithExercises) => {
   return workout.exercises.reduce(
@@ -16,13 +27,60 @@ export const newWorkout = () => {
     finishedAt: null,
     exercises: [],
   };
+
+  //save to db
+  saveWorkout(newWorkout);
   return newWorkout;
 };
 
 export const finishWorkout = (workout: WorkoutWithExercises) => {
+  const cleanedWorkout = cleanWorkout(workout);
   const finishedWorkout: WorkoutWithExercises = {
-    ...workout,
+    ...cleanedWorkout,
     finishedAt: new Date(),
   };
+
+  saveWorkout(finishedWorkout);
+
   return finishedWorkout;
+};
+
+export const cleanWorkout = (workout: WorkoutWithExercises) => {
+  const cleanedExercises = workout.exercises
+    .map(cleanExercise)
+    .filter((e) => e !== null);
+
+  return {
+    ...workout,
+    exercises: cleanedExercises,
+  };
+};
+
+const addExercisesToWorkout = async (
+  workout: Workout
+): Promise<WorkoutWithExercises> => {
+  const exercises = await getExercises(workout.id);
+  const exercisesWithSets = await Promise.all(exercises.map(addSetsToExercise));
+
+  return {
+    ...workout,
+    exercises: exercisesWithSets,
+  };
+};
+
+export const getCurrentWorkoutWithExercises =
+  async (): Promise<WorkoutWithExercises | null> => {
+    const workout = await getCurrentWorkout();
+    if (workout) {
+      return await addExercisesToWorkout(workout);
+    }
+    return null;
+  };
+
+export const getWorkoutsWithExercises = async (): Promise<
+  WorkoutWithExercises[]
+> => {
+  const workouts = await getWorkouts();
+
+  return await Promise.all(workouts.map(addExercisesToWorkout));
 };

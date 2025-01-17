@@ -1,5 +1,5 @@
 import { Stack } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { useColorScheme } from "react-native";
 import {
   ThemeProvider,
@@ -7,13 +7,28 @@ import {
   DarkTheme,
 } from "@react-navigation/native";
 import Colors from "@/constants/Colors";
+import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
+import * as SQLite from "expo-sqlite";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { dbName, getDB } from "@/db";
+import { useWorkouts } from "./store";
 
 DarkTheme.colors.primary === Colors.dark.tint;
 DefaultTheme.colors.primary === Colors.light.tint;
 
+const db = SQLite.openDatabaseSync(dbName);
+
+// SQLite.deleteDatabaseSync(dbName);
+
 const RootLayout = () => {
   const colorScheme = useColorScheme();
+  useDrizzleStudio(db);
+
+  const loadWorkout = useWorkouts((state) => state.loadWorkout);
+
+  useEffect(() => {
+    loadWorkout();
+  }, []);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
